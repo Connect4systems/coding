@@ -1,0 +1,62 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"8gXrbpmRSe\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Coding System</span>\",\"col\":12}},{\"id\":\"5L41O2kN4P\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Category\",\"col\":3}},{\"id\":\"0U0HyvIh4f\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Brand\",\"col\":3}},{\"id\":\"e6e-KxkcnJ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item Group\",\"col\":3}},{\"id\":\"8Sidl-6Y_j\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}}]",
+ "creation": "2026-09-18 22:05:06.877426",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "color-rank",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Coding System",
+ "links": [],
+ "modified": "2026-09-18 22:20:20.078820",
+ "modified_by": "Administrator",
+ "module": "Coding",
+ "name": "Coding System",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 47.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Category",
+   "link_to": "Category",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Brand",
+   "link_to": "Brand",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Item Group",
+   "link_to": "Item Group",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Item",
+   "link_to": "Item",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Coding System"
+}
