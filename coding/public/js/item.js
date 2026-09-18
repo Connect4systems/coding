@@ -1,4 +1,9 @@
 function set_item_link_queries(frm) {
+	const item_group_field = frappe.meta.get_docfield("Item", "item_group", frm.doc.name);
+	if (item_group_field) {
+		item_group_field.link_filters = null;
+	}
+
 		frm.set_query("brand", () => ({
 			query: "coding.api.get_brands",
 			filters: { category: frm.doc.custom_category },
