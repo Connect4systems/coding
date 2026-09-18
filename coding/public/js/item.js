@@ -30,9 +30,33 @@ frappe.ui.form.on("Item", {
 	custom_category(frm) {
 		frm.set_value("brand", null);
 		frm.set_value("item_group", null);
+		frm.set_value("item_code", null);
 	},
 
 	brand(frm) {
 		frm.set_value("item_group", null);
+		frm.set_value("item_code", null);
+	},
+
+	item_group(frm) {
+		frm.set_value("item_code", null);
+		if (!frm.doc.custom_category || !frm.doc.brand || !frm.doc.item_group) {
+			return;
+		}
+
+		frappe.call({
+			method: "coding.api.generate_item_code",
+			args: {
+				category: frm.doc.custom_category,
+				brand: frm.doc.brand,
+				item_group: frm.doc.item_group,
+			},
+			head: false,
+			callback(response) {
+				if (response.message && !frm.doc.item_code) {
+					frm.set_value("item_code", response.message);
+				}
+			},
+		});
 	},
 });

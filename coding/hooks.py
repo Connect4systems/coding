@@ -8,6 +8,7 @@ app_license = "mit"
 doc_events = {
 	"Item": {
 		"before_validate": "coding.item_code.set_item_code",
+		"before_save": "coding.item_code.set_item_code",
 	}
 }
 
