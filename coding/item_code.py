@@ -4,8 +4,8 @@ import frappe
 from frappe import _
 
 
-CATEGORY_DOCTYPE = "Custom Category"
-BRAND_DOCTYPE = "Custom Brand"
+CATEGORY_DOCTYPE = "Category"
+BRAND_DOCTYPE = "Brand"
 ITEM_GROUP_DOCTYPE = "Item Group"
 ITEM_DOCTYPE = "Item"
 
@@ -24,15 +24,17 @@ def _get_code_parts(category, brand, item_group):
 	brand_doc = frappe.get_doc(BRAND_DOCTYPE, brand)
 	item_group_doc = frappe.get_doc(ITEM_GROUP_DOCTYPE, item_group)
 
-	if brand_doc.category != category:
+	if not any(row.category == category for row in brand_doc.custom_categories):
 		frappe.throw(_("The selected brand does not belong to the selected category."))
-	if item_group_doc.category != category or item_group_doc.brand != brand:
+	if item_group_doc.custom_category != category or not any(
+		row.brand == brand for row in item_group_doc.custom_brands
+	):
 		frappe.throw(_("The selected item group does not belong to the selected category and brand."))
 
 	return (
 		_abbreviation(category_doc.category_abr, "Category"),
-		_abbreviation(brand_doc.brand_abr, "Brand"),
-		_abbreviation(item_group_doc.item_group_abr, "Item group"),
+		_abbreviation(brand_doc.custom_brand_abr, "Brand"),
+		_abbreviation(item_group_doc.custom_item_group_abr, "Item group"),
 	)
 
 
@@ -55,11 +57,11 @@ def _next_sequence(prefix):
 		if match:
 			last_number = int(match.group(1))
 
-		next_number = last_number + 1
-		if next_number > 999:
-			frappe.throw(_("The item-code sequence limit of 999 has been reached."))
+	next_number = last_number + 1
+	if next_number > 999:
+		frappe.throw(_("The item-code sequence limit of 999 has been reached."))
 
-		return next_number
+	return next_number
 
 
 def make_item_code(category, brand, item_group):

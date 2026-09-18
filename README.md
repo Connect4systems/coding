@@ -13,9 +13,9 @@ The app adds cascading Item selectors and generates an Item code during
 
 The implementation expects these fields:
 
-- `Custom Category.category_abr`
-- `Custom Brand.category`, `Custom Brand.brand_abr`
-- `Item Group.category`, `Item Group.brand`, `Item Group.item_group_abr`
+- `Category.category_abr`
+- `Brand.custom_categories`, `Brand.custom_brand_abr`
+- `Item Group.custom_category`, `Item Group.custom_brands`, `Item Group.custom_item_group_abr`
 - `Item.custom_category`, `Item.brand`, and the standard `Item.item_group`
 
 Brands are filtered by category. Item groups are filtered by both category and
