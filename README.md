@@ -2,6 +2,26 @@
 
 Item Code generator
 
+## Item code generation
+
+The app adds cascading Item selectors and generates an Item code during
+`before_validate`:
+
+```text
+{category_abr}-{brand_abr}-{item_group_abr}-{sequence}
+```
+
+The implementation expects these fields:
+
+- `Custom Category.category_abr`
+- `Custom Brand.category`, `Custom Brand.brand_abr`
+- `Item Group.category`, `Item Group.brand`, `Item Group.item_group_abr`
+- `Item.custom_category`, `Item.brand`, and the standard `Item.item_group`
+
+Brands are filtered by category. Item groups are filtered by both category and
+brand. The sequence starts at `001` for each three-part prefix and is assigned
+only when `item_code` is empty.
+
 ### Installation
 
 You can install this app using the [bench](https://github.com/frappe/bench) CLI:

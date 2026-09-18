@@ -5,6 +5,16 @@ app_description = "Item Code generator"
 app_email = "info@connect4systems.com"
 app_license = "mit"
 
+doc_events = {
+	"Item": {
+		"before_validate": "coding.item_code.set_item_code",
+	}
+}
+
+doctype_js = {
+	"Item": "public/js/item.js",
+}
+
 # Apps
 # ------------------
 
