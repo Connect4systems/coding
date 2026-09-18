@@ -15,6 +15,10 @@ doctype_js = {
 	"Item": "public/js/item.js",
 }
 
+override_whitelisted_methods = {
+	"frappe.desk.search.search_link": "coding.api.search_link",
+}
+
 # Apps
 # ------------------
 
