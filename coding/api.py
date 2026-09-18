@@ -29,7 +29,7 @@ def get_item_groups(doctype=None, txt="", searchfield=None, start=0, page_len=20
 
 	item_groups = frappe.get_all(
 		ITEM_GROUP_DOCTYPE,
-		filters={"custom_category": category},
+		filters={"custom_category": category, "is_group": 0},
 		fields=["name"],
 		order_by="name asc",
 	)
