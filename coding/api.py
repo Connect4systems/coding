@@ -5,7 +5,7 @@ from coding.item_code import BRAND_DOCTYPE, ITEM_GROUP_DOCTYPE, make_item_code
 
 @frappe.whitelist()
 def get_brands(doctype=None, txt="", searchfield=None, start=0, page_len=20, filters=None):
-	filters = frappe.parse_json(filters or {})
+	filters = frappe.parse_json(filters) if isinstance(filters, str) else (filters or {})
 	category = filters.get("category")
 	if not category:
 		return []
@@ -21,7 +21,7 @@ def get_brands(doctype=None, txt="", searchfield=None, start=0, page_len=20, fil
 
 @frappe.whitelist()
 def get_item_groups(doctype=None, txt="", searchfield=None, start=0, page_len=20, filters=None):
-	filters = frappe.parse_json(filters or {})
+	filters = frappe.parse_json(filters) if isinstance(filters, str) else (filters or {})
 	category = filters.get("category")
 	brand = filters.get("brand")
 	if not category or not brand:

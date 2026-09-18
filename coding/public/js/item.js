@@ -1,5 +1,4 @@
-frappe.ui.form.on("Item", {
-	setup(frm) {
+function set_item_link_queries(frm) {
 		frm.set_query("brand", () => ({
 			query: "coding.api.get_brands",
 			filters: { category: frm.doc.custom_category },
@@ -12,6 +11,15 @@ frappe.ui.form.on("Item", {
 				brand: frm.doc.brand,
 			},
 		}));
+}
+
+frappe.ui.form.on("Item", {
+	setup(frm) {
+		set_item_link_queries(frm);
+	},
+
+	onload(frm) {
+		set_item_link_queries(frm);
 	},
 
 	custom_category(frm) {
