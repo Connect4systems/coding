@@ -24,11 +24,7 @@ def _get_code_parts(category, brand, item_group):
 	brand_doc = frappe.get_doc(BRAND_DOCTYPE, brand)
 	item_group_doc = frappe.get_doc(ITEM_GROUP_DOCTYPE, item_group)
 
-	if not any(row.category == category for row in brand_doc.custom_categories):
-		frappe.throw(_("The selected brand does not belong to the selected category."))
-	if item_group_doc.custom_category != category or not any(
-		row.brand == brand for row in item_group_doc.custom_brands
-	):
+	if item_group_doc.custom_category != category or item_group_doc.custom_brand != brand:
 		frappe.throw(_("The selected item group does not belong to the selected category and brand."))
 
 	return (

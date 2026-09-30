@@ -14,13 +14,14 @@ The app adds cascading Item selectors and generates an Item code during
 The implementation expects these fields:
 
 - `Category.category_abr`
-- `Brand.custom_categories`, `Brand.custom_brand_abr`
-- `Item Group.custom_category`, `Item Group.custom_brands`, `Item Group.custom_item_group_abr`
+- `Brand.custom_brand_abr`
+- `Item Group.custom_category`, `Item Group.custom_brand`, `Item Group.custom_item_group_abr`
 - `Item.custom_category`, `Item.brand`, and the standard `Item.item_group`
 
-Brands are filtered by category. Item groups are filtered by both category and
-brand. The sequence starts at `001` for each three-part prefix and is assigned
-only when `item_code` is empty.
+Item groups link directly to one category and one brand. The Item form filters
+item groups by the selected category and brand, then generates the code. The
+sequence starts at `001` for each three-part prefix and is assigned only when
+`item_code` is empty.
 
 ### Installation
 
