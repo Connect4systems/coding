@@ -14,7 +14,7 @@
    "creation": "2026-09-18 21:37:52.043644",
    "default": null,
    "depends_on": null,
-   "description": "Select a category, then select an Item Group in that category.",
+   "description": "Select the Category for this Item.",
    "docstatus": 0,
    "dt": "Item",
    "fetch_from": null,
@@ -750,7 +750,7 @@
    "field_name": "item_code",
    "property": "description",
    "property_type": "Small Text",
-   "value": "Generated automatically when the Item is saved.",
+   "value": "Automatic code preview. The final sequence is assigned when saved.",
    "name": "Item-item_code-description"
   },
   {

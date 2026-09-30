@@ -17,7 +17,6 @@ class ItemCodeTests(unittest.TestCase):
 		self.group = SimpleNamespace(
 			name="TV",
 			is_group=0,
-			custom_category="Electronics",
 			custom_item_group_abr="tv",
 		)
 		frappe.get_doc = MagicMock(
@@ -57,11 +56,28 @@ class ItemCodeTests(unittest.TestCase):
 		self.frappe.get_doc.assert_any_call("Brand", "Samsung")
 		self.frappe.get_doc.assert_any_call("Category", "Electronics")
 
-	def test_category_mismatch_rejected(self):
+	def test_category_and_brand_are_independent_of_group(self):
 		self.doc.custom_category = "Other"
-		with self.assertRaises(ValueError):
-			self.module.set_item_code(self.doc)
+		self.module.set_item_code(self.doc)
+		self.frappe.get_doc.assert_any_call("Category", "Other")
+		self.assertEqual(self.doc.item_code, "ELE-SAM-TV-001")
+
+	def test_preview_does_not_allocate_and_accounts_for_legacy_codes(self):
+		self.group.check_permission = MagicMock()
+		# Use stable documents so each permission check is exercised.
+		documents = {
+			"Item Group": self.group,
+			"Category": SimpleNamespace(category_abr="ELE", check_permission=MagicMock()),
+			"Brand": SimpleNamespace(custom_brand_abr="SAM", check_permission=MagicMock()),
+		}
+		self.frappe.get_doc.side_effect = lambda doctype, name: documents[doctype]
+		self.frappe.db.get_value.return_value = 2
+		self.frappe.get_all.return_value = ["ELE-SAM-TV-050", "ELE-SAM-TV-OTHER"]
+		self.assertEqual(self.module.preview_item_code("Electronics", "Samsung", "TV"), "ELE-SAM-TV-051")
 		self.series.assert_not_called()
+		self.frappe.db.sql.assert_not_called()
+		for document in documents.values():
+			document.check_permission.assert_called_once_with("read")
 
 	def test_missing_category_rejected(self):
 		self.doc.custom_category = None

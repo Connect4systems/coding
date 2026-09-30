@@ -5,11 +5,12 @@ Item Code generator
 ## Item code generation
 
 Configure Category and Brand abbreviations. On each leaf Item Group, set
-**Category** and **Item Group abr**. Item Group has no Brand field.
+**Item Group abr**. Item Group has no Category or Brand field.
 
 To create an Item, select **Category**, **Brand**, and **Item Group**, enter its
-name and other required fields, and save. Item Groups are filtered by Category;
-any Brand can be selected. The server assigns:
+name and other required fields, and save. The three selections are independent. Item Code appears automatically once all
+three are selected. This is a preview; saving allocates the final sequence safely
+and may change the number if another user saves first. The server assigns:
 
 ```text
 {category_abr}-{brand_abr}-{item_group_abr}-{sequence}
@@ -36,9 +37,9 @@ bench --site YOUR_SITE clear-cache
 ```
 
 Restart the server processes with `bench restart` after deploying Python hook changes,
-then reload the browser after updating. Migration removes the Item Group Brand field.
-Select Brand directly on each new Item. Complete Category and abbreviation
-settings on Item Groups before creating Items in those groups.
+then reload the browser after updating. Migration removes Category and Brand from Item Group.
+Select Category and Brand directly on each new Item. Complete the abbreviation
+on each Item Group before creating Items.
 
 ### Local checks
 

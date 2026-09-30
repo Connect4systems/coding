@@ -14,24 +14,22 @@ def _abbreviation(value, label):
 	return value
 
 
-def set_item_code(doc, method=None):
-	"""Allocate the code before naming or validation can require Item Code."""
-	if not doc.is_new() or doc.get("variant_of"):
-		return
-	if not doc.item_group:
+def get_code_prefix(category, brand, item_group, check_permissions=False):
+	if not item_group:
 		frappe.throw(_("Select an Item Group before saving the Item."))
 
-	group = frappe.get_doc("Item Group", doc.item_group)
+	group = frappe.get_doc("Item Group", item_group)
 	if group.is_group:
 		frappe.throw(_("Select a leaf Item Group, not a parent group."))
-	if not doc.custom_category or not doc.brand:
+	if not category or not brand:
 		frappe.throw(_("Select Category and Brand before saving the Item."))
-	if group.custom_category != doc.custom_category:
-		frappe.throw(_("The Item Group must belong to the selected Category."))
 
-	category = frappe.get_doc("Category", doc.custom_category)
-	brand = frappe.get_doc("Brand", doc.brand)
-	prefix = (
+	category = frappe.get_doc("Category", category)
+	brand = frappe.get_doc("Brand", brand)
+	if check_permissions:
+		for document in (group, category, brand):
+			document.check_permission("read")
+	return (
 		"-".join(
 			(
 				_abbreviation(category.category_abr, _("Category")),
@@ -41,6 +39,22 @@ def set_item_code(doc, method=None):
 		)
 		+ "-"
 	)
+
+
+def preview_item_code(category, brand, item_group):
+	"""Read-only preview; the final number is allocated in the save transaction."""
+	prefix = get_code_prefix(category, brand, item_group, check_permissions=True)
+	current = int(frappe.db.get_value("Series", prefix, "current") or 0)
+	codes = frappe.get_all("Item", filters={"item_code": ["like", prefix + "%"]}, pluck="item_code")
+	numbers = [int(code[len(prefix) :]) for code in codes if code[len(prefix) :].isdigit()]
+	return prefix + f"{max([current, *numbers]) + 1:03d}"
+
+
+def set_item_code(doc, method=None):
+	"""Allocate the code before naming or validation can require Item Code."""
+	if not doc.is_new() or doc.get("variant_of"):
+		return
+	prefix = get_code_prefix(doc.custom_category, doc.brand, doc.item_group)
 
 	# Frappe locks the series counter until the Item transaction completes.
 	sequence = getseries(prefix, 3)
