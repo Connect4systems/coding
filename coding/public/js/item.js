@@ -1,57 +1,23 @@
-function set_item_link_queries(frm) {
-	const item_group_field = frappe.meta.get_docfield("Item", "item_group", frm.doc.name);
-	if (item_group_field) {
-		item_group_field.link_filters = null;
-	}
-
-	frm.set_query("item_group", () => ({
-		query: "coding.api.get_item_groups",
-		filters: {
-			category: frm.doc.custom_category,
-			brand: frm.doc.brand,
-		},
-	}));
-}
-
 frappe.ui.form.on("Item", {
 	setup(frm) {
-		set_item_link_queries(frm);
+		frm.set_query("item_group", () => ({ filters: { is_group: 0 } }));
 	},
 
-	onload(frm) {
-		set_item_link_queries(frm);
-	},
-
-	custom_category(frm) {
-		frm.set_value("brand", null);
-		frm.set_value("item_group", null);
-		frm.set_value("item_code", null);
-	},
-
-	brand(frm) {
-		frm.set_value("item_group", null);
-		frm.set_value("item_code", null);
-	},
-
-	item_group(frm) {
-		frm.set_value("item_code", null);
-		if (!frm.doc.custom_category || !frm.doc.brand || !frm.doc.item_group) {
+	async item_group(frm) {
+		if (!frm.is_new() || frm.doc.variant_of) return;
+		const item_group = frm.doc.item_group;
+		if (!item_group) {
+			await frm.set_value({ custom_category: null, brand: null });
 			return;
 		}
-
-		frappe.call({
-			method: "coding.api.generate_item_code",
-			args: {
-				category: frm.doc.custom_category,
-				brand: frm.doc.brand,
-				item_group: frm.doc.item_group,
-			},
-			head: false,
-			callback(response) {
-				if (response.message && !frm.doc.item_code) {
-					frm.set_value("item_code", response.message);
-				}
-			},
+		const response = await frappe.db.get_value("Item Group", item_group, [
+			"custom_category",
+			"custom_brand",
+		]);
+		if (frm.doc.item_group !== item_group || !frm.is_new()) return;
+		await frm.set_value({
+			custom_category: response.message.custom_category || null,
+			brand: response.message.custom_brand || null,
 		});
 	},
 });

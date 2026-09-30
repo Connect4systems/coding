@@ -56,13 +56,13 @@
    "read_only": 0,
    "read_only_depends_on": null,
    "report_hide": 0,
-   "reqd": 0,
+   "reqd": 1,
    "search_index": 0,
    "show_dashboard": 0,
    "sort_options": 0,
    "translatable": 1,
    "unique": 0,
-    "width": null
+   "width": null
   }
  ],
  "custom_perms": [],
@@ -90,7 +90,7 @@
    "property": "field_order",
    "property_type": "Data",
    "row_name": null,
-    "value": "[\"brand\", \"custom_brand_abr\", \"image\", \"description\", \"defaults\", \"brand_defaults\"]"
+   "value": "[\"brand\", \"custom_brand_abr\", \"image\", \"description\", \"defaults\", \"brand_defaults\"]"
   }
  ],
  "sync_on_migrate": 1
