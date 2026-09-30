@@ -4,17 +4,18 @@ Item Code generator
 
 ## Item code generation
 
-Configure Category and Brand abbreviations, then set **Category**, **Brand**
-(a single Link), and **Item Group abr** on each leaf Item Group.
+Configure Category and Brand abbreviations. On each leaf Item Group, set
+**Category** and **Item Group abr**. Item Group has no Brand field.
 
-To create an Item, select its Item Group, enter its name and other required
-fields, and save. Category and Brand fill automatically. The server assigns:
+To create an Item, select **Category**, **Brand**, and **Item Group**, enter its
+name and other required fields, and save. Item Groups are filtered by Category;
+any Brand can be selected. The server assigns:
 
 ```text
 {category_abr}-{brand_abr}-{item_group_abr}-{sequence}
 ```
 
-For example: `ELE-SAM-TV-001`, then `ELE-SAM-TV-002`.
+For example: `COM-HP-LP-001`, then `COM-HP-LP-002`.
 Abbreviations use letters and numbers and are uppercased in the code.
 Each prefix has its own transaction-protected counter, starting at `001` and
 continuing beyond `999`. Existing codes are considered when initializing the
@@ -22,9 +23,8 @@ counter. Item Code is read-only; new non-variant Items always receive an automat
 code, including copied Items and imports. Existing Items keep their codes.
 Variants retain ERPNext's normal variant naming.
 
-Brand has no Category table. Item Group has one Brand link instead of a Brand
-table. Legacy child DocTypes remain only to preserve old rows for migration and
-review; they are no longer used by the forms or code generator.
+Brand has no Category table. Legacy child DocTypes and stored Item Group Brand
+data are retained for historical review but are not used for new Item codes.
 
 ### Updating an existing site
 
@@ -34,11 +34,9 @@ bench build --app coding
 bench --site YOUR_SITE clear-cache
 ```
 
-Reload the browser after updating. Migration copies a single legacy brand into
-the new link without overwriting an existing selection. Groups with multiple
-legacy brands are listed in the Error Log for manual selection; their stored
-child rows are preserved. Complete missing Category, Brand, and abbreviation
-settings before creating Items in those groups.
+Reload the browser after updating. Migration removes the Item Group Brand field.
+Select Brand directly on each new Item. Complete Category and abbreviation
+settings on Item Groups before creating Items in those groups.
 
 ### Local checks
 

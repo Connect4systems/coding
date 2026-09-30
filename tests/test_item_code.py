@@ -18,7 +18,6 @@ class ItemCodeTests(unittest.TestCase):
 			name="TV",
 			is_group=0,
 			custom_category="Electronics",
-			custom_brand="Samsung",
 			custom_item_group_abr="tv",
 		)
 		frappe.get_doc = MagicMock(
@@ -42,17 +41,38 @@ class ItemCodeTests(unittest.TestCase):
 			item_group="TV",
 			item_code="COPIED-CODE",
 			name="old",
-			brand="Wrong brand",
-			custom_category="Wrong category",
+			brand="Samsung",
+			custom_category="Electronics",
 			is_new=lambda: True,
 			get=lambda field: None,
 		)
 
-	def test_generate_from_group_and_replace_copied_code(self):
+	def test_generate_from_item_selections_and_replace_copied_code(self):
 		self.module.set_item_code(self.doc)
 		self.assertEqual(self.doc.item_code, "ELE-SAM-TV-001")
 		self.assertEqual(self.doc.name, self.doc.item_code)
 		self.assertEqual((self.doc.brand, self.doc.custom_category), ("Samsung", "Electronics"))
+
+		self.frappe.get_doc.assert_any_call("Brand", "Samsung")
+		self.frappe.get_doc.assert_any_call("Category", "Electronics")
+
+	def test_category_mismatch_rejected(self):
+		self.doc.custom_category = "Other"
+		with self.assertRaises(ValueError):
+			self.module.set_item_code(self.doc)
+		self.series.assert_not_called()
+
+	def test_missing_category_rejected(self):
+		self.doc.custom_category = None
+		with self.assertRaises(ValueError):
+			self.module.set_item_code(self.doc)
+		self.series.assert_not_called()
+
+	def test_different_brand_uses_selected_brand(self):
+		self.doc.brand = "Another Brand"
+		self.module.set_item_code(self.doc)
+		self.frappe.get_doc.assert_any_call("Brand", "Another Brand")
+		self.assertEqual(self.doc.brand, "Another Brand")
 
 	def test_existing_items_unchanged(self):
 		self.doc.is_new = lambda: False
@@ -65,8 +85,8 @@ class ItemCodeTests(unittest.TestCase):
 		self.module.set_item_code(self.doc)
 		self.series.assert_not_called()
 
-	def test_missing_group_configuration_fails_before_allocating(self):
-		self.group.custom_brand = None
+	def test_missing_brand_fails_before_allocating(self):
+		self.doc.brand = None
 		with self.assertRaises(ValueError):
 			self.module.set_item_code(self.doc)
 		self.series.assert_not_called()

@@ -15,7 +15,7 @@ def _abbreviation(value, label):
 
 
 def set_item_code(doc, method=None):
-	"""Name new Items from their Item Group, within the insert transaction."""
+	"""Name new Items from their selected Category, Brand, and Item Group."""
 	if not doc.is_new() or doc.get("variant_of"):
 		return
 	if not doc.item_group:
@@ -24,13 +24,13 @@ def set_item_code(doc, method=None):
 	group = frappe.get_doc("Item Group", doc.item_group)
 	if group.is_group:
 		frappe.throw(_("Select a leaf Item Group, not a parent group."))
-	if not group.custom_category or not group.custom_brand:
-		frappe.throw(
-			_("Set Category and Brand in Item Group {0} before creating an Item.").format(group.name)
-		)
+	if not doc.custom_category or not doc.brand:
+		frappe.throw(_("Select Category and Brand before saving the Item."))
+	if group.custom_category != doc.custom_category:
+		frappe.throw(_("The Item Group must belong to the selected Category."))
 
-	category = frappe.get_doc("Category", group.custom_category)
-	brand = frappe.get_doc("Brand", group.custom_brand)
+	category = frappe.get_doc("Category", doc.custom_category)
+	brand = frappe.get_doc("Brand", doc.brand)
 	prefix = (
 		"-".join(
 			(
@@ -55,6 +55,4 @@ def set_item_code(doc, method=None):
 	while frappe.db.exists("Item", code):
 		code = prefix + getseries(prefix, 3)
 
-	doc.custom_category = group.custom_category
-	doc.brand = group.custom_brand
 	doc.item_code = doc.name = code

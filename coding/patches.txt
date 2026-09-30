@@ -5,4 +5,5 @@
 [post_model_sync]
 coding.patches.remove_legacy_brand_category_fields
 coding.patches.simplify_item_coding
+coding.patches.remove_item_group_brand
 # Patches added in this section will be executed after doctypes are migrated
