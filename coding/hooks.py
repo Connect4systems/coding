@@ -8,7 +8,10 @@ app_license = "mit"
 required_apps = ["erpnext"]
 
 doc_events = {
-	"Item": {"autoname": "coding.item_code.set_item_code"},
+	"Item": {
+		"before_insert": "coding.item_code.set_item_code",
+		"autoname": "coding.item_code.restore_item_name",
+	},
 }
 
 doctype_js = {

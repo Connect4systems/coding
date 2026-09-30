@@ -15,7 +15,7 @@ def _abbreviation(value, label):
 
 
 def set_item_code(doc, method=None):
-	"""Name new Items from their selected Category, Brand, and Item Group."""
+	"""Allocate the code before naming or validation can require Item Code."""
 	if not doc.is_new() or doc.get("variant_of"):
 		return
 	if not doc.item_group:
@@ -56,3 +56,11 @@ def set_item_code(doc, method=None):
 		code = prefix + getseries(prefix, 3)
 
 	doc.item_code = doc.name = code
+	doc.flags.coding_item_code = code
+
+
+def restore_item_name(doc, method=None):
+	"""Keep ERPNext naming from replacing the code allocated before insert."""
+	code = getattr(doc.flags, "coding_item_code", None)
+	if doc.is_new() and not doc.get("variant_of") and code:
+		doc.item_code = doc.name = code

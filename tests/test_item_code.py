@@ -38,6 +38,7 @@ class ItemCodeTests(unittest.TestCase):
 		self.frappe = frappe
 		self.series = naming.getseries
 		self.doc = SimpleNamespace(
+			flags=SimpleNamespace(),
 			item_group="TV",
 			item_code="COPIED-CODE",
 			name="old",
@@ -73,6 +74,40 @@ class ItemCodeTests(unittest.TestCase):
 		self.module.set_item_code(self.doc)
 		self.frappe.get_doc.assert_any_call("Brand", "Another Brand")
 		self.assertEqual(self.doc.brand, "Another Brand")
+
+	def test_insert_has_code_before_standard_naming_and_allocates_only_once(self):
+		# Follow the registered hooks, with a standard naming check in between.
+		spec = importlib.util.spec_from_file_location(
+			"tested_hooks", Path(__file__).parents[1] / "coding/hooks.py"
+		)
+		hooks = importlib.util.module_from_spec(spec)
+		spec.loader.exec_module(hooks)
+		self.doc.item_code = None
+		before_insert = hooks.doc_events["Item"]["before_insert"].rsplit(".", 1)[1]
+		getattr(self.module, before_insert)(self.doc)
+		self.assertEqual(self.doc.item_code, "ELE-SAM-TV-001")
+		# Frappe clears name; ERPNext derives it from item_code.
+		self.doc.name = None
+		if not self.doc.item_code:
+			raise ValueError("Item Code is required")
+		self.doc.name = self.doc.item_code
+		autoname = hooks.doc_events["Item"]["autoname"].rsplit(".", 1)[1]
+		getattr(self.module, autoname)(self.doc)
+		self.assertEqual(self.doc.name, "ELE-SAM-TV-001")
+		self.series.assert_called_once_with("ELE-SAM-TV-", 3)
+
+	def test_standard_naming_series_cannot_replace_generated_code(self):
+		self.module.set_item_code(self.doc)
+		self.doc.item_code = self.doc.name = "STO-ITEM-2026-00001"
+		self.module.restore_item_name(self.doc)
+		self.assertEqual(self.doc.item_code, "ELE-SAM-TV-001")
+		self.assertEqual(self.doc.name, "ELE-SAM-TV-001")
+		self.series.assert_called_once()
+
+	def test_restore_without_allocation_keeps_variant_or_existing_name(self):
+		self.module.restore_item_name(self.doc)
+		self.assertEqual(self.doc.item_code, "COPIED-CODE")
+		self.series.assert_not_called()
 
 	def test_existing_items_unchanged(self):
 		self.doc.is_new = lambda: False

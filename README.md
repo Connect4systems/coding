@@ -20,7 +20,8 @@ Abbreviations use letters and numbers and are uppercased in the code.
 Each prefix has its own transaction-protected counter, starting at `001` and
 continuing beyond `999`. Existing codes are considered when initializing the
 counter. Item Code is read-only; new non-variant Items always receive an automatic
-code, including copied Items and imports. Existing Items keep their codes.
+code, including copied Items and imports. Codes are allocated in `before_insert`,
+before naming checks can require Item Code, and retained through `autoname`. Existing Items keep their codes.
 Variants retain ERPNext's normal variant naming.
 
 Brand has no Category table. Legacy child DocTypes and stored Item Group Brand
@@ -34,7 +35,8 @@ bench build --app coding
 bench --site YOUR_SITE clear-cache
 ```
 
-Reload the browser after updating. Migration removes the Item Group Brand field.
+Restart the server processes with `bench restart` after deploying Python hook changes,
+then reload the browser after updating. Migration removes the Item Group Brand field.
 Select Brand directly on each new Item. Complete Category and abbreviation
 settings on Item Groups before creating Items in those groups.
 
