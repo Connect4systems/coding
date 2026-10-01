@@ -73,9 +73,16 @@ class ItemCodeTests(unittest.TestCase):
 			"Brand": SimpleNamespace(name="Samsung", custom_brand_abr="SAM", check_permission=MagicMock()),
 		}
 		self.frappe.get_doc.side_effect = lambda doctype, name: documents[doctype]
-		self.frappe.db.get_value.return_value = 2
+		def get_series_current(doctype, name, field, **kwargs):
+			# Model tabSeries: default ordering by modified fails on this table.
+			if kwargs.get("order_by") != "name":
+				raise RuntimeError("Unknown column 'modified' in 'ORDER BY'")
+			return 2
+
+		self.frappe.db.get_value.side_effect = get_series_current
 		self.frappe.get_all.return_value = ["ELE-SAM-TV-050", "ELE-SAM-TV-OTHER"]
 		self.assertEqual(self.module.preview_item_code("Electronics", "Samsung", "TV"), "ELE-SAM-TV-051")
+		self.frappe.db.get_value.assert_called_once_with("Series", "ELE-SAM-TV-", "current", order_by="name")
 		self.series.assert_not_called()
 		self.frappe.db.sql.assert_not_called()
 		for document in documents.values():

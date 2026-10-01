@@ -48,7 +48,8 @@ def get_code_prefix(category, brand, item_group, check_permissions=False):
 def preview_item_code(category, brand, item_group):
 	"""Read-only preview; the final number is allocated in the save transaction."""
 	prefix = get_code_prefix(category, brand, item_group, check_permissions=True)
-	current = int(frappe.db.get_value("Series", prefix, "current") or 0)
+	# Series has no modified column; override Frappe's default ordering.
+	current = int(frappe.db.get_value("Series", prefix, "current", order_by="name") or 0)
 	codes = frappe.get_all("Item", filters={"item_code": ["like", prefix + "%"]}, pluck="item_code")
 	numbers = [int(code[len(prefix) :]) for code in codes if code[len(prefix) :].isdigit()]
 	return prefix + f"{max([current, *numbers]) + 1:03d}"
