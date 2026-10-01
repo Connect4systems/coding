@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "category",
-  "category_abr"
+  "category_abr",
+  "brands"
  ],
  "fields": [
   {
@@ -23,6 +24,12 @@
    "in_list_view": 1,
    "label": "Category abr",
    "reqd": 1
+  },
+  {
+   "fieldname": "brands",
+   "fieldtype": "Table",
+   "label": "Brands",
+   "options": "Brand Table"
   }
  ],
  "grid_page_length": 50,

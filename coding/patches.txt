@@ -8,3 +8,4 @@ coding.patches.simplify_item_coding
 coding.patches.remove_item_group_brand
 coding.patches.remove_item_group_category
 # Patches added in this section will be executed after doctypes are migrated
+coding.patches.restore_category_relationships

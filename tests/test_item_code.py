@@ -18,12 +18,13 @@ class ItemCodeTests(unittest.TestCase):
 			name="TV",
 			is_group=0,
 			custom_item_group_abr="tv",
+			custom_category="Electronics",
 		)
 		frappe.get_doc = MagicMock(
 			side_effect=lambda doctype, name: {
 				"Item Group": self.group,
-				"Category": SimpleNamespace(category_abr=" ele "),
-				"Brand": SimpleNamespace(custom_brand_abr="sam"),
+				"Category": SimpleNamespace(name="Electronics", category_abr=" ele ", get=lambda field, default=None: [SimpleNamespace(brand="Samsung"), SimpleNamespace(brand="Another Brand")]),
+				"Brand": SimpleNamespace(name=name, custom_brand_abr="sam"),
 			}[doctype]
 		)
 		naming = ModuleType("frappe.model.naming")
@@ -56,19 +57,20 @@ class ItemCodeTests(unittest.TestCase):
 		self.frappe.get_doc.assert_any_call("Brand", "Samsung")
 		self.frappe.get_doc.assert_any_call("Category", "Electronics")
 
-	def test_category_and_brand_are_independent_of_group(self):
+	def test_category_must_match_group(self):
 		self.doc.custom_category = "Other"
-		self.module.set_item_code(self.doc)
-		self.frappe.get_doc.assert_any_call("Category", "Other")
-		self.assertEqual(self.doc.item_code, "ELE-SAM-TV-001")
+		self.group.custom_category = "Other"
+		with self.assertRaises(ValueError):
+			self.module.set_item_code(self.doc)
+		self.series.assert_not_called()
 
 	def test_preview_does_not_allocate_and_accounts_for_legacy_codes(self):
 		self.group.check_permission = MagicMock()
 		# Use stable documents so each permission check is exercised.
 		documents = {
 			"Item Group": self.group,
-			"Category": SimpleNamespace(category_abr="ELE", check_permission=MagicMock()),
-			"Brand": SimpleNamespace(custom_brand_abr="SAM", check_permission=MagicMock()),
+			"Category": SimpleNamespace(name="Electronics", category_abr="ELE", check_permission=MagicMock(), get=lambda field, default=None: [SimpleNamespace(brand="Samsung")]),
+			"Brand": SimpleNamespace(name="Samsung", custom_brand_abr="SAM", check_permission=MagicMock()),
 		}
 		self.frappe.get_doc.side_effect = lambda doctype, name: documents[doctype]
 		self.frappe.db.get_value.return_value = 2
@@ -90,6 +92,73 @@ class ItemCodeTests(unittest.TestCase):
 		self.module.set_item_code(self.doc)
 		self.frappe.get_doc.assert_any_call("Brand", "Another Brand")
 		self.assertEqual(self.doc.brand, "Another Brand")
+
+	def test_brand_outside_category_rejected(self):
+		self.doc.brand = "Unlisted"
+		with self.assertRaises(ValueError):
+			self.module.set_item_code(self.doc)
+		self.series.assert_not_called()
+
+	def prepare_edit(self, confirmed=None):
+		previous = SimpleNamespace(item_code="OLD-001")
+		previous.get = lambda field: {"custom_category": "Old", "brand": "Samsung", "item_group": "TV"}.get(field)
+		self.doc.is_new = lambda: False
+		self.doc.get_doc_before_save = lambda: previous
+		self.doc.get = lambda field: confirmed if field == "__coding_confirmed_code" else getattr(self.doc, field, None)
+		self.doc.item_code = previous.item_code
+
+	def test_edit_requires_confirmation_without_allocating(self):
+		self.prepare_edit()
+		with self.assertRaises(ValueError):
+			self.module.validate_item_coding(self.doc)
+		self.series.assert_not_called()
+
+	def test_confirmed_edit_allocates_and_renames(self):
+		self.prepare_edit("ELE-SAM-TV-001")
+		self.module.validate_item_coding(self.doc)
+		self.assertEqual(self.doc.item_code, "OLD-001")
+		self.frappe.rename_doc = MagicMock()
+		self.doc.get_all_children = lambda: [self.child]
+		self.child = SimpleNamespace(parent="old")
+		self.module.rename_updated_item(self.doc)
+		self.frappe.rename_doc.assert_called_once_with("Item", "old", "ELE-SAM-TV-001", merge=False)
+		self.assertEqual(self.doc.name, "ELE-SAM-TV-001")
+		self.assertEqual(self.child.parent, self.doc.name)
+
+	def test_changed_sequence_requires_confirmation_again(self):
+		self.prepare_edit("ELE-SAM-TV-001")
+		self.series.return_value = "002"
+		with self.assertRaises(ValueError):
+			self.module.validate_item_coding(self.doc)
+		self.assertFalse(hasattr(self.doc.flags, "coding_rename_to"))
+
+	def test_same_prefix_keeps_existing_sequence(self):
+		self.prepare_edit()
+		previous = self.doc.get_doc_before_save()
+		previous.item_code = self.doc.item_code = "ELE-SAM-TV-042"
+		self.module.validate_item_coding(self.doc)
+		self.series.assert_not_called()
+
+	def test_unrelated_legacy_edit_allowed(self):
+		self.prepare_edit()
+		self.doc.custom_category = "Old"
+		self.module.validate_item_coding(self.doc)
+		self.series.assert_not_called()
+
+	def test_direct_code_edit_rejected(self):
+		self.prepare_edit()
+		self.doc.custom_category = "Old"
+		self.doc.item_code = "MANUAL"
+		with self.assertRaises(ValueError):
+			self.module.validate_item_coding(self.doc)
+		self.series.assert_not_called()
+
+	def test_leaf_group_requires_category(self):
+		doc = SimpleNamespace(is_group=0, get=lambda field: None)
+		with self.assertRaises(ValueError):
+			self.module.validate_item_group_category(doc)
+		doc.is_group = 1
+		self.module.validate_item_group_category(doc)
 
 	def test_insert_has_code_before_standard_naming_and_allocates_only_once(self):
 		# Follow the registered hooks, with a standard naming check in between.

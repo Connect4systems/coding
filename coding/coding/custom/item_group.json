@@ -895,6 +895,17 @@
    "translatable": 0,
    "unique": 0,
    "width": null
+  },
+  {
+   "dt": "Item Group",
+   "name": "Item Group-custom_category",
+   "fieldname": "custom_category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Category",
+   "insert_after": "item_group_name",
+   "mandatory_depends_on": "eval:!doc.is_group",
+   "in_standard_filter": 1
   }
  ],
  "custom_perms": [],
@@ -945,7 +956,7 @@
    "property": "field_order",
    "property_type": "Data",
    "row_name": null,
-   "value": "[\"gs\", \"item_group_name\", \"custom_item_group_abr\", \"parent_item_group\", \"is_group\", \"image\", \"column_break_5\", \"defaults\", \"item_group_defaults\", \"sec_break_taxes\", \"taxes\", \"custom_website_settings\", \"show_in_website\", \"route\", \"website_title\", \"description\", \"website_specifications\", \"website_filters_section\", \"filter_fields\", \"filter_attributes\", \"include_descendants\", \"column_break_16\", \"weightage\", \"slideshow\", \"lft\", \"old_parent\", \"rgt\"]"
+   "value": "[\"gs\", \"item_group_name\", \"custom_category\", \"custom_item_group_abr\", \"parent_item_group\", \"is_group\", \"image\", \"column_break_5\", \"defaults\", \"item_group_defaults\", \"sec_break_taxes\", \"taxes\", \"custom_website_settings\", \"show_in_website\", \"route\", \"website_title\", \"description\", \"website_specifications\", \"website_filters_section\", \"filter_fields\", \"filter_attributes\", \"include_descendants\", \"column_break_16\", \"weightage\", \"slideshow\", \"lft\", \"old_parent\", \"rgt\"]"
   }
  ],
  "sync_on_migrate": 1

@@ -7,6 +7,27 @@ from unittest.mock import MagicMock, patch
 
 
 class MigrationTests(unittest.TestCase):
+	def test_restores_category_field_without_changing_existing_assignments(self):
+		frappe = ModuleType("frappe")
+		frappe.clear_cache = MagicMock()
+		frappe.db = MagicMock()
+		fields = ModuleType("frappe.custom.doctype.custom_field.custom_field")
+		fields.create_custom_fields = MagicMock()
+		spec = importlib.util.spec_from_file_location(
+			"tested_restore",
+			Path(__file__).parents[1] / "coding/patches/restore_category_relationships.py",
+		)
+		module = importlib.util.module_from_spec(spec)
+		with patch.dict(sys.modules, {"frappe": frappe, fields.__name__: fields}):
+			spec.loader.exec_module(module)
+		module.execute()
+		field = fields.create_custom_fields.call_args.args[0]["Item Group"][0]
+		self.assertEqual(field["fieldname"], "custom_category")
+		self.assertEqual(field["options"], "Category")
+		self.assertEqual(field["mandatory_depends_on"], "eval:!doc.is_group")
+		frappe.db.set_value.assert_not_called()
+		frappe.clear_cache.assert_called_once_with(doctype="Item Group")
+
 	def test_migrates_unique_brands_preserves_choices_and_reports_ambiguity(self):
 		frappe = ModuleType("frappe")
 		frappe.db = MagicMock()
